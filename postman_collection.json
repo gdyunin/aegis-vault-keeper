@@ -1,0 +1,296 @@
+{
+  "info": {
+    "name": "AegisVaultKeeper API",
+    "description": "Collection for testing AegisVaultKeeper service HTTP endpoints.\n\nUsage instructions:\n\n1. Import this file into Postman via Import > File.\n2. In the Variables section, set the following values:\n   - baseUrl: your server address (default is http://localhost:56789/api)\n   - accessToken: JWT token obtained after a successful Login request.\n   - bankcardId, credentialId, noteId, fileId: UUIDs of objects for testing (can be taken from responses of corresponding POST/GET requests).\n3. To start, execute the Register request, then Login.\n4. Copy the access_token from the Login response and paste it into the accessToken variable.\n5. After that, all protected endpoints will work correctly.\n6. To test file operations, use FileData > Upload File (select a file manually).\n7. For synchronization, use Sync > Push Sync Payload with pre-filled valid data.\n8. All example data conforms to business validations and will not cause server errors.\n9. If needed, modify variables and request bodies to test different scenarios.\n\nIf you encounter errors, check the validity of accessToken and the correctness of object UUIDs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:56789/api" },
+    { "key": "accessToken", "value": "<your_jwt_token>" },
+    { "key": "bankcardId", "value": "11111111-1111-1111-1111-111111111111" },
+    { "key": "credentialId", "value": "22222222-2222-2222-2222-222222222222" },
+    { "key": "noteId", "value": "33333333-3333-3333-3333-333333333333" },
+    { "key": "fileId", "value": "44444444-4444-4444-4444-444444444444" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"testuser\",\n  \"password\": \"TestPass123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"testuser\",\n  \"password\": \"TestPass123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "About",
+      "item": [
+        {
+          "name": "Get Build Info",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/about", "host": ["{{baseUrl}}"], "path": ["about"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "BankCards",
+      "item": [
+        {
+          "name": "Create BankCard",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/items/bankcards", "host": ["{{baseUrl}}"], "path": ["items", "bankcards"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"card_number\": \"4242424242424242\",\n  \"card_holder\": \"John Doe\",\n  \"expiry_month\": \"12\",\n  \"expiry_year\": \"2030\",\n  \"cvv\": \"123\",\n  \"description\": \"Test card\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List BankCards",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/items/bankcards", "host": ["{{baseUrl}}"], "path": ["items", "bankcards"] }
+          }
+        },
+        {
+          "name": "Get BankCard by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/items/bankcards/{{bankcardId}}", "host": ["{{baseUrl}}"], "path": ["items", "bankcards", "{{bankcardId}}"] }
+          }
+        },
+        {
+          "name": "Update BankCard",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/items/bankcards/{{bankcardId}}", "host": ["{{baseUrl}}"], "path": ["items", "bankcards", "{{bankcardId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"card_number\": \"4242424242424242\",\n  \"card_holder\": \"John Doe\",\n  \"expiry_month\": \"12\",\n  \"expiry_year\": \"2030\",\n  \"cvv\": \"123\",\n  \"description\": \"Updated card\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Credentials",
+      "item": [
+        {
+          "name": "Create Credential",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/items/credentials", "host": ["{{baseUrl}}"], "path": ["items", "credentials"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"user@example.com\",\n  \"password\": \"SecretPass1\",\n  \"description\": \"Test credential\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Credentials",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/items/credentials", "host": ["{{baseUrl}}"], "path": ["items", "credentials"] }
+          }
+        },
+        {
+          "name": "Get Credential by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/items/credentials/{{credentialId}}", "host": ["{{baseUrl}}"], "path": ["items", "credentials", "{{credentialId}}"] }
+          }
+        },
+        {
+          "name": "Update Credential",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/items/credentials/{{credentialId}}", "host": ["{{baseUrl}}"], "path": ["items", "credentials", "{{credentialId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"user@example.com\",\n  \"password\": \"NewSecretPass2\",\n  \"description\": \"Updated credential\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notes",
+      "item": [
+        {
+          "name": "Create Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/items/notes", "host": ["{{baseUrl}}"], "path": ["items", "notes"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Test note\",\n  \"description\": \"Test description\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Notes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/items/notes", "host": ["{{baseUrl}}"], "path": ["items", "notes"] }
+          }
+        },
+        {
+          "name": "Get Note by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/items/notes/{{noteId}}", "host": ["{{baseUrl}}"], "path": ["items", "notes", "{{noteId}}"] }
+          }
+        },
+        {
+          "name": "Update Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/items/notes/{{noteId}}", "host": ["{{baseUrl}}"], "path": ["items", "notes", "{{noteId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Updated note\",\n  \"description\": \"Updated description\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "FileData",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/items/filedata", "host": ["{{baseUrl}}"], "path": ["items", "filedata"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "storage_key", "value": "testfile.txt", "type": "text" },
+                { "key": "description", "value": "Test file", "type": "text" },
+                { "key": "file", "type": "file" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Files",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/items/filedata", "host": ["{{baseUrl}}"], "path": ["items", "filedata"] }
+          }
+        },
+        {
+          "name": "Download File by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/items/filedata/{{fileId}}", "host": ["{{baseUrl}}"], "path": ["items", "filedata", "{{fileId}}"] }
+          }
+        },
+        {
+          "name": "Update File",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/items/filedata/{{fileId}}", "host": ["{{baseUrl}}"], "path": ["items", "filedata", "{{fileId}}"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "storage_key", "value": "testfile.txt", "type": "text" },
+                { "key": "description", "value": "Updated file", "type": "text" },
+                { "key": "file", "type": "file" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sync",
+      "item": [
+        {
+          "name": "Push Sync Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/items/sync", "host": ["{{baseUrl}}"], "path": ["items", "sync"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankcards\": [{\n    \"card_number\": \"4242424242424242\",\n    \"card_holder\": \"John Doe\",\n    \"expiry_month\": \"12\",\n    \"expiry_year\": \"2030\",\n    \"cvv\": \"123\",\n    \"description\": \"Sync card\"\n  }],\n  \"credentials\": [{\n    \"login\": \"user@example.com\",\n    \"password\": \"SecretPass1\",\n    \"description\": \"Sync credential\"\n  }],\n  \"notes\": [{\n    \"note\": \"Sync note\",\n    \"description\": \"Sync description\"\n  }],\n  \"files\": [{\n    \"storage_key\": \"syncfile.txt\",\n    \"description\": \"Sync file\",\n    \"data\": \"U3luYyBmaWxlIGNvbnRlbnQgdGVzdA==\"\n  }]\n}"
+            }
+          }
+        },
+        {
+          "name": "Pull Sync Payload",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/items/sync", "host": ["{{baseUrl}}"], "path": ["items", "sync"] }
+          }
+        }
+      ]
+    }
+  ]
+}

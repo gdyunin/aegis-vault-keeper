@@ -1,0 +1,1 @@
+DROP SCHEMA IF EXISTS aegis_vault_keeper CASCADE;

@@ -1,0 +1,43 @@
+# Ignore OS and editor backup files
+*.swp
+*.bak
+*.tmp
+*.cache
+
+# Ignore compiled binaries and build artifacts
+*.exe
+*.exe~
+*.out
+*.test
+*.dll
+*.so
+*.dylib
+
+# Ignore logs
+*.log
+
+# Ignore dependency management directory (remove this if you want to commit vendor dependencies)
+vendor/
+
+# Ignore IDE and editor configuration files
+.idea/
+.vscode/
+
+# Ignore environment file
+.env
+
+# Ignore TLS certificates and keys (security)
+certs/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.cert
+*.cer
+
+# Ignore out files
+.out
+
+# Ignore specific development tools and generated data
+golangci-lint/
