@@ -1,0 +1,1717 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "AegisVaultKeeper is a secure personal data storage service that allows users to store\nand manage sensitive information including credentials, bank cards, notes, and files.",
+        "title": "AegisVaultKeeper API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "German Dyunin",
+            "url": "https://github.com/gdyunin/aegis_vault_keeper",
+            "email": "gdyunin@gmail.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "0.1.1"
+    },
+    "host": "localhost:56789",
+    "basePath": "/api",
+    "paths": {
+        "/about": {
+            "get": {
+                "description": "Returns version, build date, and commit hash of the application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Get application build information",
+                "responses": {
+                    "200": {
+                        "description": "Application build information",
+                        "schema": {
+                            "$ref": "#/definitions/about.BuildInfo"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "Authenticates user with login and password, returns access token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Authenticate user",
+                "parameters": [
+                    {
+                        "description": "User login credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Authentication successful",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AccessToken"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Creates a new user account with login and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "User registration data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/auth.RegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict - user already exists",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Returns HTTP 200 if the application is healthy and running",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "Application is healthy"
+                    }
+                }
+            }
+        },
+        "/items/bankcards": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all bank cards belonging to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BankCards"
+                ],
+                "summary": "List all bank cards",
+                "responses": {
+                    "200": {
+                        "description": "Bank cards retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/bankcard.ListResponse"
+                        }
+                    },
+                    "204": {
+                        "description": "No bank cards found"
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new bank card or updates an existing one if ID is provided in URL path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BankCards"
+                ],
+                "summary": "Create or update bank card",
+                "parameters": [
+                    {
+                        "description": "Bank card data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/bankcard.PushRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Bank card created or updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/bankcard.PushResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - bank card not found for update",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/items/bankcards/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a specific bank card belonging to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BankCards"
+                ],
+                "summary": "Get bank card by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Bank card ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bank card retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/bankcard.PullResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID format",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - bank card not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new bank card or updates an existing one if ID is provided in URL path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BankCards"
+                ],
+                "summary": "Create or update bank card",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Bank card ID for update operation",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "Bank card data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/bankcard.PushRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Bank card created or updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/bankcard.PushResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - bank card not found for update",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/items/credentials": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all credentials belonging to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Credentials"
+                ],
+                "summary": "List all credentials",
+                "responses": {
+                    "200": {
+                        "description": "Credentials retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/credential.ListResponse"
+                        }
+                    },
+                    "204": {
+                        "description": "No credentials found"
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new credential or updates an existing one if ID is provided in URL path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Credentials"
+                ],
+                "summary": "Create or update credential",
+                "parameters": [
+                    {
+                        "description": "Credential data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/credential.PushRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Credential created or updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/credential.PushResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - credential not found for update",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/items/credentials/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a specific credential belonging to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Credentials"
+                ],
+                "summary": "Get credential by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Credential ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Credential retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/credential.PullResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID format",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - credential not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new credential or updates an existing one if ID is provided in URL path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Credentials"
+                ],
+                "summary": "Create or update credential",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Credential ID for update operation",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "Credential data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/credential.PushRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Credential created or updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/credential.PushResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - credential not found for update",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/items/filedata": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves metadata for all files belonging to the authenticated user (without file content)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "List all files",
+                "responses": {
+                    "200": {
+                        "description": "Files metadata retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/filedata.ListResponse"
+                        }
+                    },
+                    "204": {
+                        "description": "No files found"
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Uploads a new file or updates an existing one if ID is provided in URL path",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Upload or update file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Custom storage key (filename)",
+                        "name": "storage_key",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "File description",
+                        "name": "description",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "File uploaded successfully",
+                        "schema": {
+                            "$ref": "#/definitions/filedata.PushResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data or file",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - file not found for update",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/items/filedata/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a specific file belonging to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/octet-stream",
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Get file by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "File ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File content",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID format",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - file not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Uploads a new file or updates an existing one if ID is provided in URL path",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Upload or update file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "File ID for update operation",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Custom storage key (filename)",
+                        "name": "storage_key",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "File description",
+                        "name": "description",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "File uploaded successfully",
+                        "schema": {
+                            "$ref": "#/definitions/filedata.PushResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data or file",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - file not found for update",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/items/notes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all notes belonging to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notes"
+                ],
+                "summary": "List all notes",
+                "responses": {
+                    "200": {
+                        "description": "Notes retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/note.ListResponse"
+                        }
+                    },
+                    "204": {
+                        "description": "No notes found"
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new note or updates an existing one if ID is provided in URL path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notes"
+                ],
+                "summary": "Create or update note",
+                "parameters": [
+                    {
+                        "description": "Note data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/note.PushRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Note created or updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/note.PushResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - note not found for update",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/items/notes/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a specific note belonging to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notes"
+                ],
+                "summary": "Get note by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Note ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Note retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/note.PullResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID format",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - note not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new note or updates an existing one if ID is provided in URL path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notes"
+                ],
+                "summary": "Create or update note",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Note ID for update operation",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "Note data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/note.PushRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Note created or updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/note.PushResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found - note not found for update",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/items/sync": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all user data (cards, credentials, notes, files) for synchronization",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DataSync"
+                ],
+                "summary": "Pull all user data",
+                "responses": {
+                    "200": {
+                        "description": "User data retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/datasync.SyncPayload"
+                        }
+                    },
+                    "204": {
+                        "description": "No data found"
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Uploads and syncs all user data (cards, credentials, notes, files)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DataSync"
+                ],
+                "summary": "Push user data for synchronization",
+                "parameters": [
+                    {
+                        "description": "User data to synchronize",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/datasync.SyncPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Data synchronized successfully"
+                    },
+                    "400": {
+                        "description": "Bad request - invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "about.BuildInfo": {
+            "type": "object",
+            "properties": {
+                "commit": {
+                    "description": "Commit is the Git commit hash from which the application was built.",
+                    "type": "string",
+                    "example": "0b712a2"
+                },
+                "date": {
+                    "description": "Date is the timestamp when the application was built.",
+                    "type": "string",
+                    "example": "2023-12-01T10:00:00Z"
+                },
+                "version": {
+                    "description": "Version is the semantic version string of the application build.",
+                    "type": "string",
+                    "example": "0.1.1"
+                }
+            }
+        },
+        "auth.AccessToken": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "AccessToken contains the JWT token for authenticating subsequent requests.",
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "expires_at": {
+                    "description": "ExpiresAt specifies when the token becomes invalid and must be refreshed.",
+                    "type": "string",
+                    "example": "2023-12-31T23:59:59Z"
+                },
+                "token_type": {
+                    "description": "TokenType specifies the token type, always \"Bearer\" for OAuth 2.0 compliance.",
+                    "type": "string",
+                    "example": "Bearer"
+                }
+            }
+        },
+        "auth.LoginRequest": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "description": "Login contains the user's email address or username (required, must exist in system).",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "description": "Password contains the user's plaintext password (required, verified against stored hash).",
+                    "type": "string",
+                    "example": "securePassword123"
+                }
+            }
+        },
+        "auth.RegisterRequest": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "description": "Login contains the user's email address or username (required, unique across system).",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "description": "Password contains the user's plaintext password (required, min 8 chars, will be hashed).",
+                    "type": "string",
+                    "example": "securePassword123"
+                }
+            }
+        },
+        "auth.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID contains the newly created user's unique identifier.",
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "bankcard.BankCard": {
+            "type": "object",
+            "properties": {
+                "card_holder": {
+                    "description": "CardHolder contains the name printed on the card (may differ from account holder).",
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "card_number": {
+                    "description": "CardNumber contains the 13-19 digit payment card number (PCI DSS sensitive data).",
+                    "type": "string",
+                    "example": "4242424242424242"
+                },
+                "cvv": {
+                    "description": "CVV contains the 3-4 digit card verification value (PCI DSS sensitive data).",
+                    "type": "string",
+                    "example": "123"
+                },
+                "description": {
+                    "description": "Description contains optional user-provided notes about this card.",
+                    "type": "string",
+                    "example": "Main credit card"
+                },
+                "expiry_month": {
+                    "description": "ExpiryMonth contains the two-digit expiration month (01-12).",
+                    "type": "string",
+                    "example": "12"
+                },
+                "expiry_year": {
+                    "description": "ExpiryYear contains the two-digit expiration year (YY format).",
+                    "type": "string",
+                    "example": "2025"
+                },
+                "id": {
+                    "description": "ID contains the unique identifier for this bank card record.",
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "updated_at": {
+                    "description": "UpdatedAt contains the timestamp when this card was last modified.",
+                    "type": "string",
+                    "example": "2023-12-01T10:00:00Z"
+                }
+            }
+        },
+        "bankcard.ListResponse": {
+            "type": "object",
+            "properties": {
+                "bankcards": {
+                    "description": "BankCards contains the list of all bank cards belonging to the user.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/bankcard.BankCard"
+                    }
+                }
+            }
+        },
+        "bankcard.PullResponse": {
+            "type": "object",
+            "properties": {
+                "bankcard": {
+                    "description": "BankCard contains the requested bank card data.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/bankcard.BankCard"
+                        }
+                    ]
+                }
+            }
+        },
+        "bankcard.PushRequest": {
+            "type": "object",
+            "required": [
+                "card_holder",
+                "card_number",
+                "cvv",
+                "expiry_month",
+                "expiry_year"
+            ],
+            "properties": {
+                "card_holder": {
+                    "description": "CardHolder contains the name as printed on the card (required, max 255 chars).",
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "card_number": {
+                    "description": "CardNumber contains the 13-19 digit payment card number (required, PCI DSS sensitive).",
+                    "type": "string",
+                    "example": "1234567812345678"
+                },
+                "cvv": {
+                    "description": "CVV contains the 3-4 digit card verification value (required, PCI DSS sensitive).",
+                    "type": "string",
+                    "example": "123"
+                },
+                "description": {
+                    "description": "Description contains optional user notes about this card (max 500 chars).",
+                    "type": "string",
+                    "example": "Main credit card"
+                },
+                "expiry_month": {
+                    "description": "ExpiryMonth contains the two-digit expiration month 01-12 (required).",
+                    "type": "string",
+                    "example": "12"
+                },
+                "expiry_year": {
+                    "description": "ExpiryYear contains the two-digit expiration year YY format (required).",
+                    "type": "string",
+                    "example": "25"
+                }
+            }
+        },
+        "bankcard.PushResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID contains the UUID of the created or updated bank card.",
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "credential.Credential": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Description contains optional user notes about where this credential is used.",
+                    "type": "string",
+                    "example": "Email account credentials"
+                },
+                "id": {
+                    "description": "ID contains the unique identifier for this credential record.",
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "login": {
+                    "description": "Login contains the username, email, or account identifier (sensitive data).",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "description": "Password contains the plaintext password (highly sensitive, transmitted encrypted).",
+                    "type": "string",
+                    "example": "securePassword123"
+                },
+                "updated_at": {
+                    "description": "UpdatedAt contains the timestamp when this credential was last modified.",
+                    "type": "string",
+                    "example": "2023-12-01T10:00:00Z"
+                }
+            }
+        },
+        "credential.ListResponse": {
+            "type": "object",
+            "properties": {
+                "credentials": {
+                    "description": "List of credentials",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/credential.Credential"
+                    }
+                }
+            }
+        },
+        "credential.PullResponse": {
+            "type": "object",
+            "properties": {
+                "credential": {
+                    "description": "Credential data",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/credential.Credential"
+                        }
+                    ]
+                }
+            }
+        },
+        "credential.PushRequest": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "description": {
+                    "description": "Optional description",
+                    "type": "string",
+                    "example": "Email account credentials"
+                },
+                "login": {
+                    "description": "Login username or email (required)",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "description": "Password (required)",
+                    "type": "string",
+                    "example": "securePassword123"
+                }
+            }
+        },
+        "credential.PushResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Created or updated credential ID",
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "datasync.SyncPayload": {
+            "type": "object",
+            "properties": {
+                "bankcards": {
+                    "description": "BankCards contains the user's bank card data for synchronization.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/bankcard.BankCard"
+                    }
+                },
+                "credentials": {
+                    "description": "Credentials contains the user's credential data for synchronization.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/credential.Credential"
+                    }
+                },
+                "files": {
+                    "description": "Files contains the user's file data for synchronization.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/filedata.FileData"
+                    }
+                },
+                "notes": {
+                    "description": "Notes contains the user's note data for synchronization.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/note.Note"
+                    }
+                }
+            }
+        },
+        "filedata.FileData": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Data contains the file content bytes (omitted in list responses).",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "description": {
+                    "description": "Description is the user-provided description of the file content.",
+                    "type": "string",
+                    "example": "Important PDF document"
+                },
+                "hash_sum": {
+                    "description": "HashSum is the MD5 hash of the file content for integrity verification.",
+                    "type": "string",
+                    "example": "d41d8cd98f00b204e9800998ecf8427e"
+                },
+                "id": {
+                    "description": "ID is the unique file identifier.",
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "storage_key": {
+                    "description": "StorageKey is the filename or key used for storing the file.",
+                    "type": "string",
+                    "example": "document.pdf"
+                },
+                "updated_at": {
+                    "description": "UpdatedAt indicates when the file was last modified.",
+                    "type": "string",
+                    "example": "2023-12-01T10:00:00Z"
+                },
+                "user_id": {
+                    "description": "UserID identifies the file owner.",
+                    "type": "string",
+                    "example": "987fcdeb-51a2-43d1-9f12-ba9876543210"
+                }
+            }
+        },
+        "filedata.ListResponse": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "description": "Files contains metadata for all files belonging to the user.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/filedata.FileData"
+                    }
+                }
+            }
+        },
+        "filedata.PushResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID is the unique identifier assigned to the uploaded file.",
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "note.ListResponse": {
+            "type": "object",
+            "properties": {
+                "notes": {
+                    "description": "Notes contains all notes belonging to the authenticated user.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/note.Note"
+                    }
+                }
+            }
+        },
+        "note.Note": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Description contains optional metadata description (max 255 chars).",
+                    "type": "string",
+                    "example": "Meeting with client ABC"
+                },
+                "id": {
+                    "description": "ID contains the unique note identifier.",
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "note": {
+                    "description": "Note contains the text content (required, max 1000 chars).",
+                    "type": "string",
+                    "example": "Important meeting notes"
+                },
+                "updated_at": {
+                    "description": "UpdatedAt contains the last modification timestamp.",
+                    "type": "string",
+                    "example": "2023-12-01T10:00:00Z"
+                }
+            }
+        },
+        "note.PullResponse": {
+            "type": "object",
+            "properties": {
+                "note": {
+                    "description": "Note contains the requested note data.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/note.Note"
+                        }
+                    ]
+                }
+            }
+        },
+        "note.PushRequest": {
+            "type": "object",
+            "required": [
+                "note"
+            ],
+            "properties": {
+                "description": {
+                    "description": "Description contains optional metadata description (max 255 chars).",
+                    "type": "string",
+                    "example": "Meeting with client ABC"
+                },
+                "note": {
+                    "description": "Note contains the text content (required, max 1000 chars).",
+                    "type": "string",
+                    "example": "Important meeting notes"
+                }
+            }
+        },
+        "note.PushResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID contains the created or updated note identifier.",
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "response.Error": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "description": "Messages contains one or more error descriptions for the client.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Bearer token authentication. Use 'Bearer {token}' format.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

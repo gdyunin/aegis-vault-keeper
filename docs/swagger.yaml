@@ -1,0 +1,1178 @@
+basePath: /api
+definitions:
+  about.BuildInfo:
+    properties:
+      commit:
+        description: Commit is the Git commit hash from which the application was
+          built.
+        example: 0b712a2
+        type: string
+      date:
+        description: Date is the timestamp when the application was built.
+        example: "2023-12-01T10:00:00Z"
+        type: string
+      version:
+        description: Version is the semantic version string of the application build.
+        example: 0.1.1
+        type: string
+    type: object
+  auth.AccessToken:
+    properties:
+      access_token:
+        description: AccessToken contains the JWT token for authenticating subsequent
+          requests.
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      expires_at:
+        description: ExpiresAt specifies when the token becomes invalid and must be
+          refreshed.
+        example: "2023-12-31T23:59:59Z"
+        type: string
+      token_type:
+        description: TokenType specifies the token type, always "Bearer" for OAuth
+          2.0 compliance.
+        example: Bearer
+        type: string
+    type: object
+  auth.LoginRequest:
+    properties:
+      login:
+        description: Login contains the user's email address or username (required,
+          must exist in system).
+        example: user@example.com
+        type: string
+      password:
+        description: Password contains the user's plaintext password (required, verified
+          against stored hash).
+        example: securePassword123
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  auth.RegisterRequest:
+    properties:
+      login:
+        description: Login contains the user's email address or username (required,
+          unique across system).
+        example: user@example.com
+        type: string
+      password:
+        description: Password contains the user's plaintext password (required, min
+          8 chars, will be hashed).
+        example: securePassword123
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  auth.RegisterResponse:
+    properties:
+      id:
+        description: ID contains the newly created user's unique identifier.
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  bankcard.BankCard:
+    properties:
+      card_holder:
+        description: CardHolder contains the name printed on the card (may differ
+          from account holder).
+        example: John Doe
+        type: string
+      card_number:
+        description: CardNumber contains the 13-19 digit payment card number (PCI
+          DSS sensitive data).
+        example: "4242424242424242"
+        type: string
+      cvv:
+        description: CVV contains the 3-4 digit card verification value (PCI DSS sensitive
+          data).
+        example: "123"
+        type: string
+      description:
+        description: Description contains optional user-provided notes about this
+          card.
+        example: Main credit card
+        type: string
+      expiry_month:
+        description: ExpiryMonth contains the two-digit expiration month (01-12).
+        example: "12"
+        type: string
+      expiry_year:
+        description: ExpiryYear contains the two-digit expiration year (YY format).
+        example: "2025"
+        type: string
+      id:
+        description: ID contains the unique identifier for this bank card record.
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      updated_at:
+        description: UpdatedAt contains the timestamp when this card was last modified.
+        example: "2023-12-01T10:00:00Z"
+        type: string
+    type: object
+  bankcard.ListResponse:
+    properties:
+      bankcards:
+        description: BankCards contains the list of all bank cards belonging to the
+          user.
+        items:
+          $ref: '#/definitions/bankcard.BankCard'
+        type: array
+    type: object
+  bankcard.PullResponse:
+    properties:
+      bankcard:
+        allOf:
+        - $ref: '#/definitions/bankcard.BankCard'
+        description: BankCard contains the requested bank card data.
+    type: object
+  bankcard.PushRequest:
+    properties:
+      card_holder:
+        description: CardHolder contains the name as printed on the card (required,
+          max 255 chars).
+        example: John Doe
+        type: string
+      card_number:
+        description: CardNumber contains the 13-19 digit payment card number (required,
+          PCI DSS sensitive).
+        example: "1234567812345678"
+        type: string
+      cvv:
+        description: CVV contains the 3-4 digit card verification value (required,
+          PCI DSS sensitive).
+        example: "123"
+        type: string
+      description:
+        description: Description contains optional user notes about this card (max
+          500 chars).
+        example: Main credit card
+        type: string
+      expiry_month:
+        description: ExpiryMonth contains the two-digit expiration month 01-12 (required).
+        example: "12"
+        type: string
+      expiry_year:
+        description: ExpiryYear contains the two-digit expiration year YY format (required).
+        example: "25"
+        type: string
+    required:
+    - card_holder
+    - card_number
+    - cvv
+    - expiry_month
+    - expiry_year
+    type: object
+  bankcard.PushResponse:
+    properties:
+      id:
+        description: ID contains the UUID of the created or updated bank card.
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  credential.Credential:
+    properties:
+      description:
+        description: Description contains optional user notes about where this credential
+          is used.
+        example: Email account credentials
+        type: string
+      id:
+        description: ID contains the unique identifier for this credential record.
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      login:
+        description: Login contains the username, email, or account identifier (sensitive
+          data).
+        example: user@example.com
+        type: string
+      password:
+        description: Password contains the plaintext password (highly sensitive, transmitted
+          encrypted).
+        example: securePassword123
+        type: string
+      updated_at:
+        description: UpdatedAt contains the timestamp when this credential was last
+          modified.
+        example: "2023-12-01T10:00:00Z"
+        type: string
+    type: object
+  credential.ListResponse:
+    properties:
+      credentials:
+        description: List of credentials
+        items:
+          $ref: '#/definitions/credential.Credential'
+        type: array
+    type: object
+  credential.PullResponse:
+    properties:
+      credential:
+        allOf:
+        - $ref: '#/definitions/credential.Credential'
+        description: Credential data
+    type: object
+  credential.PushRequest:
+    properties:
+      description:
+        description: Optional description
+        example: Email account credentials
+        type: string
+      login:
+        description: Login username or email (required)
+        example: user@example.com
+        type: string
+      password:
+        description: Password (required)
+        example: securePassword123
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  credential.PushResponse:
+    properties:
+      id:
+        description: Created or updated credential ID
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  datasync.SyncPayload:
+    properties:
+      bankcards:
+        description: BankCards contains the user's bank card data for synchronization.
+        items:
+          $ref: '#/definitions/bankcard.BankCard'
+        type: array
+      credentials:
+        description: Credentials contains the user's credential data for synchronization.
+        items:
+          $ref: '#/definitions/credential.Credential'
+        type: array
+      files:
+        description: Files contains the user's file data for synchronization.
+        items:
+          $ref: '#/definitions/filedata.FileData'
+        type: array
+      notes:
+        description: Notes contains the user's note data for synchronization.
+        items:
+          $ref: '#/definitions/note.Note'
+        type: array
+    type: object
+  filedata.FileData:
+    properties:
+      data:
+        description: Data contains the file content bytes (omitted in list responses).
+        items:
+          type: integer
+        type: array
+      description:
+        description: Description is the user-provided description of the file content.
+        example: Important PDF document
+        type: string
+      hash_sum:
+        description: HashSum is the MD5 hash of the file content for integrity verification.
+        example: d41d8cd98f00b204e9800998ecf8427e
+        type: string
+      id:
+        description: ID is the unique file identifier.
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      storage_key:
+        description: StorageKey is the filename or key used for storing the file.
+        example: document.pdf
+        type: string
+      updated_at:
+        description: UpdatedAt indicates when the file was last modified.
+        example: "2023-12-01T10:00:00Z"
+        type: string
+      user_id:
+        description: UserID identifies the file owner.
+        example: 987fcdeb-51a2-43d1-9f12-ba9876543210
+        type: string
+    type: object
+  filedata.ListResponse:
+    properties:
+      files:
+        description: Files contains metadata for all files belonging to the user.
+        items:
+          $ref: '#/definitions/filedata.FileData'
+        type: array
+    type: object
+  filedata.PushResponse:
+    properties:
+      id:
+        description: ID is the unique identifier assigned to the uploaded file.
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  note.ListResponse:
+    properties:
+      notes:
+        description: Notes contains all notes belonging to the authenticated user.
+        items:
+          $ref: '#/definitions/note.Note'
+        type: array
+    type: object
+  note.Note:
+    properties:
+      description:
+        description: Description contains optional metadata description (max 255 chars).
+        example: Meeting with client ABC
+        type: string
+      id:
+        description: ID contains the unique note identifier.
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      note:
+        description: Note contains the text content (required, max 1000 chars).
+        example: Important meeting notes
+        type: string
+      updated_at:
+        description: UpdatedAt contains the last modification timestamp.
+        example: "2023-12-01T10:00:00Z"
+        type: string
+    type: object
+  note.PullResponse:
+    properties:
+      note:
+        allOf:
+        - $ref: '#/definitions/note.Note'
+        description: Note contains the requested note data.
+    type: object
+  note.PushRequest:
+    properties:
+      description:
+        description: Description contains optional metadata description (max 255 chars).
+        example: Meeting with client ABC
+        type: string
+      note:
+        description: Note contains the text content (required, max 1000 chars).
+        example: Important meeting notes
+        type: string
+    required:
+    - note
+    type: object
+  note.PushResponse:
+    properties:
+      id:
+        description: ID contains the created or updated note identifier.
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  response.Error:
+    properties:
+      messages:
+        description: Messages contains one or more error descriptions for the client.
+        items:
+          type: string
+        type: array
+    type: object
+host: localhost:56789
+info:
+  contact:
+    email: gdyunin@gmail.com
+    name: German Dyunin
+    url: https://github.com/gdyunin/aegis_vault_keeper
+  description: |-
+    AegisVaultKeeper is a secure personal data storage service that allows users to store
+    and manage sensitive information including credentials, bank cards, notes, and files.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: AegisVaultKeeper API
+  version: 0.1.1
+paths:
+  /about:
+    get:
+      consumes:
+      - application/json
+      description: Returns version, build date, and commit hash of the application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application build information
+          schema:
+            $ref: '#/definitions/about.BuildInfo'
+      summary: Get application build information
+      tags:
+      - System
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates user with login and password, returns access token
+      parameters:
+      - description: User login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Authentication successful
+          schema:
+            $ref: '#/definitions/auth.AccessToken'
+        "400":
+          description: Bad request - invalid input data
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid credentials
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      summary: Authenticate user
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account with login and password
+      parameters:
+      - description: User registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/auth.RegisterResponse'
+        "400":
+          description: Bad request - invalid input data
+          schema:
+            $ref: '#/definitions/response.Error'
+        "409":
+          description: Conflict - user already exists
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      summary: Register a new user
+      tags:
+      - Auth
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Returns HTTP 200 if the application is healthy and running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application is healthy
+      summary: Health check
+      tags:
+      - System
+  /items/bankcards:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all bank cards belonging to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bank cards retrieved successfully
+          schema:
+            $ref: '#/definitions/bankcard.ListResponse'
+        "204":
+          description: No bank cards found
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: List all bank cards
+      tags:
+      - BankCards
+    post:
+      consumes:
+      - application/json
+      description: Creates a new bank card or updates an existing one if ID is provided
+        in URL path
+      parameters:
+      - description: Bank card data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/bankcard.PushRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Bank card created or updated successfully
+          schema:
+            $ref: '#/definitions/bankcard.PushResponse'
+        "400":
+          description: Bad request - invalid input data
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - bank card not found for update
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Create or update bank card
+      tags:
+      - BankCards
+  /items/bankcards/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific bank card belonging to the authenticated user
+      parameters:
+      - description: Bank card ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bank card retrieved successfully
+          schema:
+            $ref: '#/definitions/bankcard.PullResponse'
+        "400":
+          description: Bad request - invalid ID format
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - bank card not found
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Get bank card by ID
+      tags:
+      - BankCards
+    put:
+      consumes:
+      - application/json
+      description: Creates a new bank card or updates an existing one if ID is provided
+        in URL path
+      parameters:
+      - description: Bank card ID for update operation
+        format: uuid
+        in: path
+        name: id
+        type: string
+      - description: Bank card data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/bankcard.PushRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Bank card created or updated successfully
+          schema:
+            $ref: '#/definitions/bankcard.PushResponse'
+        "400":
+          description: Bad request - invalid input data
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - bank card not found for update
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Create or update bank card
+      tags:
+      - BankCards
+  /items/credentials:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all credentials belonging to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Credentials retrieved successfully
+          schema:
+            $ref: '#/definitions/credential.ListResponse'
+        "204":
+          description: No credentials found
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: List all credentials
+      tags:
+      - Credentials
+    post:
+      consumes:
+      - application/json
+      description: Creates a new credential or updates an existing one if ID is provided
+        in URL path
+      parameters:
+      - description: Credential data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/credential.PushRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Credential created or updated successfully
+          schema:
+            $ref: '#/definitions/credential.PushResponse'
+        "400":
+          description: Bad request - invalid input data
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - credential not found for update
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Create or update credential
+      tags:
+      - Credentials
+  /items/credentials/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific credential belonging to the authenticated
+        user
+      parameters:
+      - description: Credential ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Credential retrieved successfully
+          schema:
+            $ref: '#/definitions/credential.PullResponse'
+        "400":
+          description: Bad request - invalid ID format
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - credential not found
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Get credential by ID
+      tags:
+      - Credentials
+    put:
+      consumes:
+      - application/json
+      description: Creates a new credential or updates an existing one if ID is provided
+        in URL path
+      parameters:
+      - description: Credential ID for update operation
+        format: uuid
+        in: path
+        name: id
+        type: string
+      - description: Credential data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/credential.PushRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Credential created or updated successfully
+          schema:
+            $ref: '#/definitions/credential.PushResponse'
+        "400":
+          description: Bad request - invalid input data
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - credential not found for update
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Create or update credential
+      tags:
+      - Credentials
+  /items/filedata:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves metadata for all files belonging to the authenticated
+        user (without file content)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Files metadata retrieved successfully
+          schema:
+            $ref: '#/definitions/filedata.ListResponse'
+        "204":
+          description: No files found
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: List all files
+      tags:
+      - Files
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a new file or updates an existing one if ID is provided
+        in URL path
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Custom storage key (filename)
+        in: formData
+        name: storage_key
+        type: string
+      - description: File description
+        in: formData
+        name: description
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: File uploaded successfully
+          schema:
+            $ref: '#/definitions/filedata.PushResponse'
+        "400":
+          description: Bad request - invalid input data or file
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - file not found for update
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Upload or update file
+      tags:
+      - Files
+  /items/filedata/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific file belonging to the authenticated user
+      parameters:
+      - description: File ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      - application/json
+      responses:
+        "200":
+          description: File content
+          schema:
+            type: file
+        "400":
+          description: Bad request - invalid ID format
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - file not found
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Get file by ID
+      tags:
+      - Files
+    put:
+      consumes:
+      - multipart/form-data
+      description: Uploads a new file or updates an existing one if ID is provided
+        in URL path
+      parameters:
+      - description: File ID for update operation
+        format: uuid
+        in: path
+        name: id
+        type: string
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Custom storage key (filename)
+        in: formData
+        name: storage_key
+        type: string
+      - description: File description
+        in: formData
+        name: description
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: File uploaded successfully
+          schema:
+            $ref: '#/definitions/filedata.PushResponse'
+        "400":
+          description: Bad request - invalid input data or file
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - file not found for update
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Upload or update file
+      tags:
+      - Files
+  /items/notes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all notes belonging to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notes retrieved successfully
+          schema:
+            $ref: '#/definitions/note.ListResponse'
+        "204":
+          description: No notes found
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: List all notes
+      tags:
+      - Notes
+    post:
+      consumes:
+      - application/json
+      description: Creates a new note or updates an existing one if ID is provided
+        in URL path
+      parameters:
+      - description: Note data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/note.PushRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Note created or updated successfully
+          schema:
+            $ref: '#/definitions/note.PushResponse'
+        "400":
+          description: Bad request - invalid input data
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - note not found for update
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Create or update note
+      tags:
+      - Notes
+  /items/notes/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific note belonging to the authenticated user
+      parameters:
+      - description: Note ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Note retrieved successfully
+          schema:
+            $ref: '#/definitions/note.PullResponse'
+        "400":
+          description: Bad request - invalid ID format
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - note not found
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Get note by ID
+      tags:
+      - Notes
+    put:
+      consumes:
+      - application/json
+      description: Creates a new note or updates an existing one if ID is provided
+        in URL path
+      parameters:
+      - description: Note ID for update operation
+        format: uuid
+        in: path
+        name: id
+        type: string
+      - description: Note data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/note.PushRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Note created or updated successfully
+          schema:
+            $ref: '#/definitions/note.PushResponse'
+        "400":
+          description: Bad request - invalid input data
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "404":
+          description: Not found - note not found for update
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Create or update note
+      tags:
+      - Notes
+  /items/sync:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all user data (cards, credentials, notes, files) for
+        synchronization
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data retrieved successfully
+          schema:
+            $ref: '#/definitions/datasync.SyncPayload'
+        "204":
+          description: No data found
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Pull all user data
+      tags:
+      - DataSync
+    post:
+      consumes:
+      - application/json
+      description: Uploads and syncs all user data (cards, credentials, notes, files)
+      parameters:
+      - description: User data to synchronize
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/datasync.SyncPayload'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Data synchronized successfully
+        "400":
+          description: Bad request - invalid input data
+          schema:
+            $ref: '#/definitions/response.Error'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Error'
+      security:
+      - BearerAuth: []
+      summary: Push user data for synchronization
+      tags:
+      - DataSync
+securityDefinitions:
+  BearerAuth:
+    description: Bearer token authentication. Use 'Bearer {token}' format.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

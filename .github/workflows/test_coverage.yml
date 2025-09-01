@@ -1,0 +1,66 @@
+name: run tests with coverage
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  test:
+    name: run tests and check coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.4'
+
+      - name: Run tests
+        id: test
+        run: |
+          RETRIES=3
+          for i in $(seq 1 $RETRIES); do
+            echo "Attempt $i of $RETRIES..."
+            if go test -coverprofile=coverage.out ./...; then
+              echo "Tests passed successfully."
+              COVERAGE=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}')
+              echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+              exit 0
+            else
+              echo "Tests failed. Retrying in 5 seconds..."
+              sleep 5
+            fi
+          done
+          echo "All attempts failed. Exiting with error."
+          exit 1
+
+      - name: Get coverage percentage
+        id: coverage
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}')
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+
+      - name: Post coverage to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const commitSha = context.payload.pull_request.head.sha.substring(0, 7);
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `Покрытие тестами после коммита **${commitSha}**: **${process.env.COVERAGE}**`
+            });
+        env:
+          COVERAGE: ${{ steps.coverage.outputs.coverage }}

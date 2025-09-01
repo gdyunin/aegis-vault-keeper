@@ -1,0 +1,42 @@
+name: build and make up
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
+jobs:
+  try-make-up:
+    name: try build and make up
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Make .env file
+        run: make env-from-template
+        id: make_env_from_template
+
+      - name: Make certs
+        run: make certs
+        id: make_certs
+        continue-on-error: true
+
+      - name: Make up
+        run: make up
+        id: make_up
+        continue-on-error: true
+
+      - name: Make down
+        run: make down
+        if: always()
+
+      - name: Make up failed
+        if: steps.make_up.outcome == 'failure'
+        run: exit 1

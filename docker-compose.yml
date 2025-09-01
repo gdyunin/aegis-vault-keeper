@@ -1,0 +1,77 @@
+services:
+  db:
+    image: postgres:17.2
+    container_name: db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+    ports:
+      - "56790:${POSTGRES_PORT}"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_NAME}" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  migrate:
+    image: migrate/migrate:v4.18.2
+    env_file:
+      - .env
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations
+    command: [ "-path", "/migrations", "-database", "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB_NAME}?sslmode=${POSTGRES_SSL_MODE}", "up" ]
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_VERSION: ${BUILD_VERSION:-N/A}
+        BUILD_DATE:    ${BUILD_DATE:-N/A}
+        BUILD_COMMIT:  ${BUILD_COMMIT:-N/A}
+    container_name: app
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_SSL_MODE: ${POSTGRES_SSL_MODE}
+      APPLICATION_PORT: ${APPLICATION_PORT}
+      TLS_ENABLED: ${TLS_ENABLED:-true}
+      TLS_CERT_FILE: ${TLS_CERT_FILE:-/app/certs/server.pem}
+      TLS_KEY_FILE: ${TLS_KEY_FILE:-/app/certs/server-key.pem}
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - ./config:/app/config:ro
+      - ./certs:/app/certs:ro
+      - app_filestorage:/app/filestorage
+    ports:
+      - "56789:${APPLICATION_PORT}"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+volumes:
+  pg_data:
+  app_filestorage:
